@@ -3,48 +3,468 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>长期项目测试页</title>
+    <title>长期项目迭代面板</title>
     <style>
       :root {
         color-scheme: light;
         font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+        --page: #f3f6fb;
+        --surface: #ffffff;
+        --surface-soft: #f7f9fc;
+        --text: #1f2937;
+        --muted: #64748b;
+        --border: #dbe3ef;
+        --primary: #174ea6;
+        --primary-strong: #123b82;
+        --focus: #8db7ff;
+        --danger: #b42318;
+        --shadow: 0 16px 40px rgb(31 41 55 / 10%);
+      }
+
+      :root[data-theme="dark"] {
+        color-scheme: dark;
+        --page: #111827;
+        --surface: #1f2937;
+        --surface-soft: #273449;
+        --text: #e5e7eb;
+        --muted: #aab7c8;
+        --border: #3b4a61;
+        --primary: #8db7ff;
+        --primary-strong: #b9d2ff;
+        --focus: #b9d2ff;
+        --danger: #ff9b8e;
+        --shadow: 0 16px 40px rgb(0 0 0 / 25%);
+      }
+
+      * {
+        box-sizing: border-box;
       }
 
       body {
         margin: 0;
         min-height: 100vh;
-        display: grid;
-        place-items: center;
-        background: #f3f6fb;
-        color: #1f2937;
+        padding: 2rem 1rem;
+        background: var(--page);
+        color: var(--text);
       }
 
-      main {
-        width: min(90vw, 640px);
-        padding: 2.5rem;
-        border: 1px solid #dbe3ef;
+      button,
+      input {
+        font: inherit;
+      }
+
+      button {
+        cursor: pointer;
+      }
+
+      button:focus-visible,
+      input:focus-visible {
+        outline: 3px solid var(--focus);
+        outline-offset: 2px;
+      }
+
+      .app-shell {
+        width: min(100%, 760px);
+        margin: 0 auto;
+      }
+
+      .hero,
+      .task-card,
+      .note {
+        border: 1px solid var(--border);
         border-radius: 16px;
-        background: #ffffff;
-        box-shadow: 0 12px 32px rgb(31 41 55 / 10%);
+        background: var(--surface);
+        box-shadow: var(--shadow);
+      }
+
+      .hero {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 1rem;
+        padding: 2rem;
+      }
+
+      .eyebrow {
+        margin: 0 0 0.5rem;
+        color: var(--primary);
+        font-size: 0.75rem;
+        font-weight: 800;
+        letter-spacing: 0.12em;
+      }
+
+      h1,
+      h2,
+      p {
+        margin-top: 0;
       }
 
       h1 {
-        margin-top: 0;
-        color: #174ea6;
+        margin-bottom: 0.75rem;
+        color: var(--primary);
+        font-size: clamp(1.8rem, 5vw, 2.6rem);
       }
 
-      code {
-        padding: 0.15rem 0.35rem;
-        border-radius: 4px;
-        background: #eef2ff;
+      h2 {
+        margin-bottom: 0.4rem;
+        font-size: 1.15rem;
+      }
+
+      .hero p:last-child,
+      .note p {
+        margin-bottom: 0;
+        color: var(--muted);
+        line-height: 1.6;
+      }
+
+      .button {
+        border: 1px solid var(--primary);
+        border-radius: 10px;
+        padding: 0.65rem 0.9rem;
+        background: var(--primary);
+        color: #ffffff;
+        font-weight: 700;
+        white-space: nowrap;
+      }
+
+      .button:hover {
+        background: var(--primary-strong);
+      }
+
+      .summary {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 0.75rem;
+        margin: 1rem 0;
+      }
+
+      .summary-card {
+        padding: 1rem;
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        background: var(--surface);
+        text-align: center;
+      }
+
+      .summary-card span,
+      .summary-card strong {
+        display: block;
+      }
+
+      .summary-card span {
+        color: var(--muted);
+        font-size: 0.85rem;
+      }
+
+      .summary-card strong {
+        margin-top: 0.25rem;
+        color: var(--primary);
+        font-size: 1.5rem;
+      }
+
+      .task-card,
+      .note {
+        padding: 1.5rem;
+      }
+
+      .task-card {
+        box-shadow: none;
+      }
+
+      .task-form {
+        display: flex;
+        gap: 0.6rem;
+        margin: 1.2rem 0;
+      }
+
+      .task-input {
+        min-width: 0;
+        flex: 1;
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        padding: 0.7rem 0.8rem;
+        background: var(--surface-soft);
+        color: var(--text);
+      }
+
+      .task-list {
+        display: grid;
+        gap: 0.65rem;
+        margin: 0;
+        padding: 0;
+        list-style: none;
+      }
+
+      .task-item {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        padding: 0.75rem;
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        background: var(--surface-soft);
+      }
+
+      .task-item input {
+        width: 1.1rem;
+        height: 1.1rem;
+        accent-color: var(--primary);
+      }
+
+      .task-text {
+        min-width: 0;
+        flex: 1;
+        overflow-wrap: anywhere;
+      }
+
+      .task-item.completed .task-text {
+        color: var(--muted);
+        text-decoration: line-through;
+      }
+
+      .delete-button {
+        border: 0;
+        padding: 0.35rem 0.5rem;
+        background: transparent;
+        color: var(--danger);
+      }
+
+      .empty-state {
+        margin: 1rem 0 0;
+        color: var(--muted);
+        text-align: center;
+      }
+
+      .note {
+        margin-top: 1rem;
+        box-shadow: none;
+      }
+
+      .sr-only {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        padding: 0;
+        overflow: hidden;
+        clip: rect(0, 0, 0, 0);
+        white-space: nowrap;
+        border: 0;
+      }
+
+      @media (max-width: 560px) {
+        body {
+          padding: 1rem 0.75rem;
+        }
+
+        .hero {
+          display: block;
+          padding: 1.4rem;
+        }
+
+        .hero .button {
+          margin-top: 1rem;
+        }
+
+        .task-card,
+        .note {
+          padding: 1.2rem;
+        }
+
+        .task-form {
+          display: grid;
+          grid-template-columns: 1fr;
+        }
       }
     </style>
   </head>
   <body>
-    <main>
-      <h1>项目运行正常</h1>
-      <p>这是一个用于验证长期项目目录和 Git 工作流的最小 HTML 项目。</p>
-      <p>项目文件位于 <code>D:\code\html-git-test</code>。</p>
+    <main class="app-shell">
+      <header class="hero">
+        <div>
+          <p class="eyebrow">LONG-TERM PROJECT TEST</p>
+          <h1>项目迭代面板</h1>
+          <p>这是第一次功能迭代：加入本地任务清单和主题切换，验证页面交互、持久化和版本管理流程。</p>
+        </div>
+        <button class="button" id="theme-toggle" type="button" aria-pressed="false">切换深色模式</button>
+      </header>
+
+      <section class="summary" aria-label="任务统计">
+        <div class="summary-card">
+          <span>总任务</span>
+          <strong id="task-total">0</strong>
+        </div>
+        <div class="summary-card">
+          <span>已完成</span>
+          <strong id="task-completed">0</strong>
+        </div>
+        <div class="summary-card">
+          <span>完成率</span>
+          <strong id="task-rate">0%</strong>
+        </div>
+      </section>
+
+      <section class="task-card" aria-labelledby="task-heading">
+        <h2 id="task-heading">本地任务清单</h2>
+        <p>任务只保存在当前浏览器中，不会发送到网络。</p>
+        <form class="task-form" id="task-form">
+          <label class="sr-only" for="task-input">新任务</label>
+          <input class="task-input" id="task-input" name="task" type="text" maxlength="80" autocomplete="off" placeholder="例如：检查一次页面迭代" required />
+          <button class="button" type="submit">添加任务</button>
+        </form>
+        <ul class="task-list" id="task-list" aria-live="polite"></ul>
+        <p class="empty-state" id="task-empty" hidden>还没有任务，添加第一条吧。</p>
+      </section>
+
+      <section class="note" aria-labelledby="safety-heading">
+        <h2 id="safety-heading">安全与持久化</h2>
+        <p>本页面无外部依赖，用户输入使用安全的文本节点渲染；任务和主题偏好仅存储在本机浏览器的本地存储中。</p>
+      </section>
     </main>
+
+    <script>
+      "use strict";
+
+      const STORAGE_KEYS = Object.freeze({
+        tasks: "html-git-test.tasks.v1",
+        theme: "html-git-test.theme.v1",
+      });
+
+      const DEFAULT_TASKS = Object.freeze([
+        { id: "welcome", text: "查看 README 中的运行说明", done: false },
+        { id: "git", text: "完成一次本地 Git 提交", done: true },
+      ]);
+
+      const elements = {
+        form: document.querySelector("#task-form"),
+        input: document.querySelector("#task-input"),
+        list: document.querySelector("#task-list"),
+        empty: document.querySelector("#task-empty"),
+        total: document.querySelector("#task-total"),
+        completed: document.querySelector("#task-completed"),
+        rate: document.querySelector("#task-rate"),
+        themeToggle: document.querySelector("#theme-toggle"),
+      };
+
+      function readStorage(key, fallback) {
+        try {
+          const value = window.localStorage.getItem(key);
+          return value === null ? fallback : JSON.parse(value);
+        } catch {
+          return fallback;
+        }
+      }
+
+      function writeStorage(key, value) {
+        try {
+          window.localStorage.setItem(key, JSON.stringify(value));
+        } catch {
+          // 页面在禁用本地存储的浏览器中仍然可以正常使用。
+        }
+      }
+
+      function createId() {
+        return window.crypto?.randomUUID?.() || `${Date.now()}-${Math.random().toString(16).slice(2)}`;
+      }
+
+      function normalizeTasks(value) {
+        if (!Array.isArray(value)) {
+          return DEFAULT_TASKS.map((task) => ({ ...task }));
+        }
+
+        const normalized = value
+          .filter((task) => task && typeof task.text === "string" && task.text.trim())
+          .map((task) => ({
+            id: String(task.id || createId()),
+            text: task.text.trim().slice(0, 80),
+            done: Boolean(task.done),
+          }))
+          .slice(0, 100);
+
+        return normalized.length ? normalized : DEFAULT_TASKS.map((task) => ({ ...task }));
+      }
+
+      let tasks = normalizeTasks(readStorage(STORAGE_KEYS.tasks, null));
+
+      function saveTasks() {
+        writeStorage(STORAGE_KEYS.tasks, tasks);
+      }
+
+      function updateSummary() {
+        const completed = tasks.filter((task) => task.done).length;
+        const rate = tasks.length ? Math.round((completed / tasks.length) * 100) : 0;
+        elements.total.textContent = String(tasks.length);
+        elements.completed.textContent = String(completed);
+        elements.rate.textContent = `${rate}%`;
+      }
+
+      function renderTasks() {
+        elements.list.replaceChildren();
+        elements.empty.hidden = tasks.length > 0;
+
+        tasks.forEach((task) => {
+          const item = document.createElement("li");
+          item.className = "task-item";
+          if (task.done) item.classList.add("completed");
+
+          const checkbox = document.createElement("input");
+          checkbox.type = "checkbox";
+          checkbox.checked = task.done;
+          checkbox.setAttribute("aria-label", `完成任务：${task.text}`);
+          checkbox.addEventListener("change", () => {
+            task.done = checkbox.checked;
+            saveTasks();
+            renderTasks();
+          });
+
+          const text = document.createElement("span");
+          text.className = "task-text";
+          text.textContent = task.text;
+
+          const deleteButton = document.createElement("button");
+          deleteButton.className = "delete-button";
+          deleteButton.type = "button";
+          deleteButton.textContent = "删除";
+          deleteButton.setAttribute("aria-label", `删除任务：${task.text}`);
+          deleteButton.addEventListener("click", () => {
+            tasks = tasks.filter((candidate) => candidate.id !== task.id);
+            saveTasks();
+            renderTasks();
+          });
+
+          item.append(checkbox, text, deleteButton);
+          elements.list.append(item);
+        });
+
+        updateSummary();
+      }
+
+      function applyTheme(theme) {
+        const isDark = theme === "dark";
+        document.documentElement.dataset.theme = isDark ? "dark" : "light";
+        elements.themeToggle.textContent = isDark ? "切换浅色模式" : "切换深色模式";
+        elements.themeToggle.setAttribute("aria-pressed", String(isDark));
+      }
+
+      elements.form.addEventListener("submit", (event) => {
+        event.preventDefault();
+        const text = elements.input.value.trim();
+        if (!text) return;
+
+        tasks.push({ id: createId(), text: text.slice(0, 80), done: false });
+        saveTasks();
+        elements.input.value = "";
+        renderTasks();
+        elements.input.focus();
+      });
+
+      elements.themeToggle.addEventListener("click", () => {
+        const nextTheme = document.documentElement.dataset.theme === "dark" ? "light" : "dark";
+        writeStorage(STORAGE_KEYS.theme, nextTheme);
+        applyTheme(nextTheme);
+      });
+
+      applyTheme(readStorage(STORAGE_KEYS.theme, "light"));
+      renderTasks();
+    </script>
   </body>
 </html>
